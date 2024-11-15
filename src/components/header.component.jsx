@@ -1,12 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie'; // Импортируем библиотеку для работы с куками
 
-function Header({ username, onLogout}) {
+function Header({ user, onLogout }) {
   const navigate = useNavigate();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
-  const dropdownRef = useRef(null); // Ссылка на выпадающее меню
+  const dropdownRef = useRef(null);
 
   const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
@@ -19,22 +18,19 @@ function Header({ username, onLogout}) {
   const confirmLogout = () => {
     setModalOpen(false);
     navigate('/');
-    Cookies.remove('token'); // Удаляем токен из куков
-    onLogout(); // Вызываем функцию выхода
+    onLogout();
   };
 
   const cancelLogout = () => {
-    setModalOpen(false); // Закрываем модальное окно
+    setModalOpen(false);
   };
 
-  // Обработчик для закрытия выпадающего списка при клике вне его зоны
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false); // Закрываем меню
+        setDropdownOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -47,12 +43,12 @@ function Header({ username, onLogout}) {
         <div className="container d-flex justify-content-between align-items-center h-100">
           <div className="d-flex align-items-center h-100">
             <Link to="/" className="text-white text-decoration-none">
-            <img 
-              src="/images/logo-white-goriz.svg" 
-              alt="Logo" 
-              className="me-5" 
-              style={{ height: '3rem', width: 'auto' }}
-            />
+              <img 
+                src="/images/logo-white-goriz.svg" 
+                alt="Logo" 
+                className="me-5" 
+                style={{ height: '3rem', width: 'auto' }}
+              />
             </Link>
           </div>
           <nav className="d-flex flex-wrap align-items-center">
@@ -61,28 +57,28 @@ function Header({ username, onLogout}) {
             <Link to="/articles" className="text-white text-decoration-none me-1 ms-3">Статьи</Link>
             <Link to="/news" className="text-white text-decoration-none me-1 ms-3">Новости</Link>
             <Link to="/contacts" className="text-white text-decoration-none me-1 ms-3">Контакты</Link>
-            {username ? (
+            {user ? (
               <div className="dropdown ms-1" ref={dropdownRef}>
-              <button 
-                className="btn btn-link text-white text-decoration-none dropdown-toggle" 
-                type="button" 
-                onClick={toggleDropdown}
-                id="userDropdown" 
-                aria-expanded={isDropdownOpen}
-              >
-                {username}
-              </button>
-              <ul className={`dropdown-menu ${isDropdownOpen ? 'show' : ''}`} aria-labelledby="userDropdown">
-                <li>
-                  <Link to="/cabinet" onClick={toggleDropdown} className="dropdown-item">Личный кабинет</Link>
-                </li>
-                <li>
-                  <button onClick={() => { toggleDropdown(); handleLogout(); }} className="dropdown-item">Выйти</button>
-                </li>
-              </ul>
-            </div>
+                <button 
+                  className="btn btn-link text-white text-decoration-none dropdown-toggle" 
+                  type="button" 
+                  onClick={toggleDropdown}
+                  id="userDropdown" 
+                  aria-expanded={isDropdownOpen}
+                >
+                  {user.login}
+                </button>
+                <ul className={`dropdown-menu ${isDropdownOpen ? 'show' : ''}`} aria-labelledby="userDropdown">
+                  <li>
+                    <Link to="/cabinet" onClick={toggleDropdown} className="dropdown-item">Личный кабинет</Link>
+                  </li>
+                  <li>
+                    <button onClick={() => { toggleDropdown(); handleLogout(); }} className="dropdown-item">Выйти</button>
+                  </li>
+                </ul>
+              </div>
             ) : (
-            <Link to="/auth" className="text-white text-decoration-none text-nowrap ms-3">Личный кабинет</Link>
+              <Link to="/auth" className="text-white text-decoration-none text-nowrap ms-3">Личный кабинет</Link>
             )}
           </nav>
         </div>

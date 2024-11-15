@@ -1,41 +1,51 @@
-import React, { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Cookies from 'js-cookie'
-import './App.css'
-import Header from './components/header.component'
-import Login from './pages/login.page'
-import Cabinet from './pages/cabinet.page'
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import './App.css';
+
+import api from "./conf/api";
+import Header from './components/header.component';
+import Login from './pages/login.page';
+import Cabinet from './pages/cabinet.page';
 
 function App() {
-  const [username, setUsername] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const token = Cookies.get('token'); // Проверяем наличие токена в cookie
-    if (token) {
-      const parsedToken = JSON.parse(atob(token.split('.')[1])); // Декодируем токен
-      setUsername(parsedToken.login); // Устанавливаем имя пользователя из токена
+    const userData = Cookies.get('UserData');
+    if (userData) {
+      setUser(JSON.parse(userData));
     }
   }, []);
 
-  const handleLogin = (user) => {
-    setUsername(user);
+  const handleLogin = (userData) => {
+    setUser(userData);
+    Cookies.set('UserData', JSON.stringify(userData)); // Сохраняем информацию о пользователе в куке
   };
 
-  const handleLogout = () => {
-    setUsername(null);
+  const handleLogout = async () => {
+    try {
+      const response = await api.post('/auth/logout');
+      setUser(null);
+      Cookies.remove('UserData'); // Удаляем куку при выходе
+    } catch (error) {
+      error.message;
+    }
+    
+
   };
 
   return (
     <div>
       <Router>
-      <Header username={username} onLogout={handleLogout}/>
-      <Routes>
-        <Route path="/auth" element={<Login onLogin={handleLogin}/>}></Route>
-        <Route path="/cabinet" element={<Cabinet />}></Route>
-      </Routes>
+        <Header user={user} onLogout={handleLogout} />
+        <Routes>
+          <Route path="/auth" element={<Login onLogin={handleLogin} />}/>
+          <Route path="/cabinet" element={<Cabinet />}/>
+        </Routes>
       </Router>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

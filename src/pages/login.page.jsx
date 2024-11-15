@@ -1,62 +1,84 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie'; // Импортируем библиотеку для работы с куками
+
+import api from "../conf/api";
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function Login({ onLogin }) {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = "Вход";
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/sign-in', {
-        login,
-        password
-      });
+      const response = await api.post("/auth/sign-in", { login, password });
+      const userData = {
+        login: response.data.login,
+        username: response.data.username,
+        r: response.data.rl
+      };
 
-      const receivedToken = response.data.token;
-      Cookies.set('token', receivedToken); // Сохраняем токен в куках
-
-      onLogin(login);
-
-      navigate('/cabinet');
+      onLogin(userData);
+      navigate('/cabinet'); // Перенаправляем пользователя на страницу кабинета
     } catch (error) {
       setError('Неверный логин или пароль');
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <div className="container mt-5">
-      <h2>Авторизация</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="username" className="form-label">Логин</label>
-          <input
-            type="text"
-            className="form-control"
-            id="login"
-            value={login}
-            onChange={(e) => setLogin(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">Пароль</label>
-          <input
-            type="password"
-            className="form-control"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {error && <div className="alert alert-danger">{error}</div>}
-        <button type="submit" className="btn btn-primary">Войти</button>
-      </form>
+    <div className="d-flex justify-content-center align-items-center mt-5">
+      <div className="card p-4 shadow" style={{ minWidth: '400px' }}>
+        <h3 className="text-center mb-4">Авторизация</h3>
+        <form onSubmit={handleSubmit} className="v-form">
+          <div className="mb-3">
+            <label className="form-label">Логин</label>
+            <div className="input-group">
+              <input 
+                type="text" 
+                className="form-control" 
+                value={login} 
+                onChange={(e) => setLogin(e.target.value)} 
+                required 
+                placeholder="Введите логин"
+              />
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="form-label">Пароль</label>
+            <div className="input-group">
+              <input 
+                type={showPassword ? "text" : "password"}
+                className="form-control" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                required 
+                placeholder="Введите пароль"
+              />
+              <span className="input-group-text" onClick={togglePasswordVisibility} style={{ cursor: 'pointer' }}>
+                <i className={`bi ${showPassword ? 'bi-eye' : 'bi-eye-slash'}`}></i>
+              </span>
+            </div>
+          </div>
+          {error && <div className="alert alert-danger text-center">{error}</div>}
+          <div className="text-center">
+            <button type="submit" className="btn btn-primary w-100">
+              Войти
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

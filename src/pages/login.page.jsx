@@ -27,7 +27,7 @@ function Login({ onLogin }) {
       };
 
       onLogin(userData);
-      navigate('/cabinet'); // Перенаправляем пользователя на страницу кабинета
+      navigate('/cabinet');
     } catch (error) {
       setError('Неверный логин или пароль');
     }
